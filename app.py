@@ -68,7 +68,11 @@ for ticker, name in stocks.items():
 df_result = pd.DataFrame(results)
 
 st.subheader("📈 AI選股結果")
-st.dataframe(df_result.sort_values("評分", ascending=False))
+
+if df_result.empty:
+    st.warning("目前沒有可顯示的股票資料")
+else:
+    st.dataframe(df_result.sort_values("評分", ascending=False))
 
 st.subheader("💰 ETF現金流")
 
