@@ -18,27 +18,33 @@ data=[]
 
 for s in stocks:
 
-    df=yf.download(s,period="6mo")
+    df = yf.download(s, period="6mo", progress=False)
 
-    df["MA5"]=df["Close"].rolling(5).mean()
-    df["MA20"]=df["Close"].rolling(20).mean()
+    if df.empty:
+        continue
 
-    latest=df.iloc[-1]
+    df["MA5"] = df["Close"].rolling(5).mean()
+    df["MA20"] = df["Close"].rolling(20).mean()
 
-    signal=""
+    latest = df.iloc[-1]
 
-    if latest["Close"]>latest["MA20"] and latest["Close"]>latest["MA5"]:
-        signal="📈 可考慮進場"
-    else:
-        signal="觀察"
+    close = float(latest["Close"])
+    ma5 = float(latest["MA5"]) if not pd.isna(latest["MA5"]) else None
+    ma20 = float(latest["MA20"]) if not pd.isna(latest["MA20"]) else None
+
+    signal = "觀察"
+
+    if ma5 and ma20:
+        if close > ma20 and close > ma5:
+            signal = "📈 可考慮進場"
 
     data.append({
-        "股票":s,
-        "現價":round(latest["Close"],2),
-        "訊號":signal
+        "股票": s,
+        "現價": round(close,2),
+        "訊號": signal
     })
 
-df=pd.DataFrame(data)
+df = pd.DataFrame(data)
 
 st.subheader("AI選股結果")
 
@@ -46,10 +52,10 @@ st.dataframe(df)
 
 st.subheader("ETF現金流計算")
 
-etf1=st.number_input("00878 投入金額",0,10000000,100000)
-etf2=st.number_input("00919 投入金額",0,10000000,100000)
-etf3=st.number_input("0056 投入金額",0,10000000,100000)
+etf1 = st.number_input("00878 投入金額",0,10000000,100000)
+etf2 = st.number_input("00919 投入金額",0,10000000,100000)
+etf3 = st.number_input("0056 投入金額",0,10000000,100000)
 
-income=(etf1*0.06+etf2*0.07+etf3*0.05)/12
+income = (etf1*0.06 + etf2*0.07 + etf3*0.05) / 12
 
 st.success(f"預估每月現金流：{round(income)} 元")
